@@ -1,5 +1,8 @@
 package project1;
-import java.util.ArrayList;
+import java.util.*;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -8,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+
 
 public class TweetCollection {
 	private ArrayList<Tweet> tweets;
@@ -30,13 +34,20 @@ public class TweetCollection {
 	
 	// Retrieve tweet based off ID;
 	public Tweet get(String rid) {
-		int index = tweets.indexOf(new Tweet(rid));
-		if(index > -1) {
-			Tweet searched = tweets.get(index);
-			return searched;
+		int i = 0;
+		while(i < tweets.size() && !tweets.get(i).getId().equals(rid) ) {
+			i++;
 		}
-		else
-			return null;
+		
+		try {
+			if(tweets.get(i).getId().equals(rid))
+				return tweets.get(i);
+		}
+		catch (Exception e) {
+			System.err.println("No tweet correlates to id: " + rid);
+			
+		}
+		return null;		
 	}
 	
 	// Return list of all IDs of the Tweets in the Collection
@@ -53,16 +64,29 @@ public class TweetCollection {
 	public ArrayList<String> getUserTweetIds(String name) {
 		ArrayList<String> ids = new ArrayList<String>();
 		for(int i = 0; i < tweets.size(); i++) {
-			if(tweets.get(i).getUser() == name) {
-				ids.add(tweets.get(i).getUser());
+			if(tweets.get(i).getUser().equals(name)) {
+				ids.add(tweets.get(i).getId());
 			}
 		}
 		return ids;
 	}
 	
 	// Delete/Remove tweet using ID from collection.
-	public void remove(Tweet tw) {
-		tweets.remove(tw);
+	public void remove(String id) {
+		int i = 0;
+
+		while(i < tweets.size() && !tweets.get(i).getId().equals(id) ) {
+			i++;
+		}
+		
+		try {
+			if(tweets.get(i).getId().equals(id))
+				tweets.remove(i);
+		}
+		catch (Exception e) {
+			System.err.println("No tweet correlates to id: " + id);
+		}
+
 	}
 	
 	@Override
@@ -136,7 +160,7 @@ public class TweetCollection {
 			for (int i = 0; i < tweets.size(); i++) {
 				Tweet tweet = tweets.get(i);
 				if (tweet instanceof Tweet) {
-					myOutfile.write (tweet.getPolarity()+","+tweet.getId()+","+tweet.getUser()+","+tweet.getBodyText());
+					myOutfile.write (tweet.getPolarity()+","+tweet.getId()+","+tweet.getUser()+","+tweet.getBodyText()+"\n");
 					
 				}
 				else {

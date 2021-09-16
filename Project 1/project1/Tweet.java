@@ -8,14 +8,14 @@ public class Tweet {
 	
 	// Default Constructor
 	public Tweet() {
-		polarity = "not set";
 		id = "not set";
+		polarity = "not set";		
 		user = "not set";
 		bodyText = "not set";
 	}
-	public Tweet(String id) {
+	public Tweet(String ids) {
 		polarity = "not set";
-		id = id;
+		id = ids;
 		user = "not set";
 		bodyText = "not set";
 	}
