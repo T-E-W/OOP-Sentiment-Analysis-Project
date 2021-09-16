@@ -7,6 +7,12 @@ public class Tweet {
 	private String bodyText;
 	
 	// Default Constructor
+	public Tweet() {
+		polarity = "not set";
+		id = "not set";
+		user = "not set";
+		bodyText = "not set";
+	}
 	public Tweet(String id) {
 		polarity = "not set";
 		id = id;
