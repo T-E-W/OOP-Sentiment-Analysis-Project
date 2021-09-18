@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
 
-public class TweetCollection {
+public class TweetCollection extends Predictor{
 	private ArrayList<Tweet> tweets;
 	private String fileName;
 	
@@ -89,6 +89,14 @@ public class TweetCollection {
 
 	}
 	
+	public int predict() {
+		for(int i = 0; i < tweets.size(); i++) {
+			System.out.println((this.predict(tweets.get(i))));
+		}
+		return 0;
+	}
+
+	
 	@Override
 	public String toString() {
 		return "TweetCollection [tweets=" + tweets + "]";
@@ -100,8 +108,8 @@ public class TweetCollection {
 			FileReader fr = new FileReader(fileName);
 			lineReader = new BufferedReader(fr);
 			String line = null;
+			// While line is not empty, split line, make new tweet(tw), add it
 			while ((line = lineReader.readLine())!=null) {
-				
 				String[] parts = line.split(",");
 				Tweet tw = new Tweet(parts[0], parts[1], parts[2], parts[3]);
 				tweets.add(tw);
