@@ -8,19 +8,26 @@ import java.io.IOException;
 public class Predictor{
 	private String positiveWords;
 	private String negativeWords;
-	public static int posPolarity;
-	public static int negPolarity;
-	public static int neutralPolarity;
+	public static double predictedPosPolarity;
+	public static double predictedNegPolarity;
+	public static double correctPosPolarity;
+	public static double correctNegPolarity;
+	public static double numPosPolarity;
+	public static double numNegPolarity;
+	//public static int neutralPolarity;
 	public Predictor() {
 		negativeWords="negWords.txt";
 		positiveWords="posWords.txt";
-//		posPolarity = 0;
-//		negPolarity = 0;
 	}	
+	
+	public Predictor(String neg, String pos) {
+		negativeWords = neg;
+		positiveWords = pos;
+	}
 	
 	public int predict(Tweet tw) {
 		int negwords = 0;
-		int poswords = 0;
+		//int poswords = 0;
 		BufferedReader lineReader = null;
 		FileReader fr;
 		
@@ -41,6 +48,7 @@ public class Predictor{
 				if(tw.getBodyText().toLowerCase().contains(line)) {
 					 negwords++;
 				}
+
 			}
 		} catch (IOException e1) {
 			
@@ -68,7 +76,7 @@ public class Predictor{
 		try {
 			while ((line = lineReader.readLine())!=null) {
 				if(tw.getBodyText().toLowerCase().contains(line)) {
-					 poswords++;
+					 negwords--;
 				}
 			}
 		} catch (IOException e1) {
@@ -82,23 +90,59 @@ public class Predictor{
 			e.printStackTrace();
 		}
 		
+		//adding 1 to num if it is pos or neg.
+		//Tracks how many of each tweet there is without having to know
+		if(tw.getPolarity().equals("0"))
+			numNegPolarity += 1;
+		if(tw.getPolarity().equals("4"))
+			numPosPolarity += 1;
 		
-		if(negwords > 1) {
-			this.negPolarity += 1;
+		// if the polarity equals 4 and i predicted positive, add one (Correct predictions add one to either neg/pos)
+		if(tw.getPolarity().equals("4") && negwords <= 0) 
+			correctPosPolarity += 1;		
+		else if(tw.getPolarity().equals("0") && negwords > 0)
+			correctNegPolarity += 1;
+
+		// if I predict neg or positive, add 1 accordingly.
+		if(negwords > 0) {
+			predictedNegPolarity += 1;
 			return 0;
 		}
 		else{
-			this.posPolarity += 1;
+			predictedPosPolarity += 1;
 			return 4;
 		}
 
 	}
+	//Added to allow reset of all tracking data throughout predictor use. 
+	public void reset() {
+		predictedPosPolarity = 0;
+		predictedNegPolarity = 0;
+		correctPosPolarity = 0;
+		correctNegPolarity = 0;
+		numPosPolarity = 0;
+		numNegPolarity = 0;
+	}
 
 	@Override
 	public String toString() {
-		return "Predictor [positive tweets=" + posPolarity + ", negative tweets=" + negPolarity + "]";
+		//Will output the actual percentage, even if num of predicted pos/neg tweets are greater than # of actual in existence
+		// thanks to trackers in code above.
+		double percentPos = (correctPosPolarity / numPosPolarity) * 100;
+		double percentNeg = (correctNegPolarity / numNegPolarity) * 100;
+		
+		double percentTotal = ((correctPosPolarity + correctNegPolarity) / (numPosPolarity + numNegPolarity)) * 100;
+		
+		
+		return "Predictor "
+				+ "\n Total Positive Tweets: " + numPosPolarity + 
+				  "\n Total Negative Tweets: " + numNegPolarity +
+				  "\n Predicted Positive Tweets: " + predictedPosPolarity +
+				  "\n Predicted Negative Tweets: " + predictedNegPolarity +
+				  "\n % of Positives Guessed Right: " + String.format("%.2f",percentPos) +
+				 "%\n % of Negatives Guessed Right: " + String.format("%.2f",percentNeg) + "%" +
+				  "\n Total Accuracy Percentage: " + String.format("%.2f", percentTotal) + "%";
 	}
-	
 	
 }
 

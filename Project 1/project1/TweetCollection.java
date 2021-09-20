@@ -16,10 +16,12 @@ import java.nio.charset.Charset;
 public class TweetCollection extends Predictor{
 	private ArrayList<Tweet> tweets;
 	private String fileName;
+	private Predictor p;
 	
 	public TweetCollection() {
 		fileName="tweets";
 		tweets = new ArrayList<Tweet>();
+		p = new Predictor();
 	}
 	public TweetCollection(String fn) {
 		this();		
@@ -91,7 +93,8 @@ public class TweetCollection extends Predictor{
 	
 	public int predict() {
 		for(int i = 0; i < tweets.size(); i++) {
-			System.out.println((this.predict(tweets.get(i))));
+			//System.out.println((this.predict(tweets.get(i))));
+			this.predict(tweets.get(i));
 		}
 		return 0;
 	}
@@ -99,7 +102,13 @@ public class TweetCollection extends Predictor{
 	
 	@Override
 	public String toString() {
-		return "TweetCollection [tweets=" + tweets + "]";
+		System.out.println("\nTweets:\n");
+		for(int i = 0; i < 10; i++) {
+			System.out.println(tweets.get(i));
+		}
+		
+		
+		return "TweetData: " + p;
 	}
 	
 	private void readFile () {

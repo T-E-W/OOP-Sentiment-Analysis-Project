@@ -13,6 +13,7 @@ public class Tweet {
 		user = "not set";
 		bodyText = "not set";
 	}
+	//
 	public Tweet(String ids) {
 		polarity = "not set";
 		id = ids;
