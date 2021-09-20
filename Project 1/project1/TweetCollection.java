@@ -1,16 +1,11 @@
 package project1;
 import java.util.*;
-
-import javax.swing.text.html.HTMLDocument.Iterator;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 
 
 public class TweetCollection extends Predictor{
@@ -108,9 +103,10 @@ public class TweetCollection extends Predictor{
 		}
 		
 		
-		return "TweetData: " + p;
+		return "TweetData:\n " + p;
 	}
 	
+	//read/write files as done in HW, edited to fit.
 	private void readFile () {
 		BufferedReader lineReader = null;
 		try {
@@ -167,7 +163,7 @@ public class TweetCollection extends Predictor{
 	}// end of writeFile method
 	
 	private void doWrite(String fn) {
-		// this method writes all of the data in the persons array to a file
+		// this method writes all of the data in the Tweets array to a file.
 		try
 		{
 

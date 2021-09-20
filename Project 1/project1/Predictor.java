@@ -27,6 +27,8 @@ public class Predictor{
 	
 	public int predict(Tweet tw) {
 		int negwords = 0;
+		
+		//Was using this to do a poswords/negwords comparison, went with adding/subtracting from negwords instead.
 		//int poswords = 0;
 		BufferedReader lineReader = null;
 		FileReader fr;
@@ -70,7 +72,6 @@ public class Predictor{
 			e1.printStackTrace();
 		}
 		
-	
 		line = null;
 		
 		try {
@@ -114,6 +115,7 @@ public class Predictor{
 		}
 
 	}
+	
 	//Added to allow reset of all tracking data throughout predictor use. 
 	public void reset() {
 		predictedPosPolarity = 0;
@@ -128,8 +130,14 @@ public class Predictor{
 	public String toString() {
 		//Will output the actual percentage, even if num of predicted pos/neg tweets are greater than # of actual in existence
 		// thanks to trackers in code above.
+
 		double percentPos = (correctPosPolarity / numPosPolarity) * 100;
 		double percentNeg = (correctNegPolarity / numNegPolarity) * 100;
+		
+		if(numPosPolarity == 0)
+			percentPos = 0;
+		if(numNegPolarity == 0)
+			percentNeg = 0;
 		
 		double percentTotal = ((correctPosPolarity + correctNegPolarity) / (numPosPolarity + numNegPolarity)) * 100;
 		
