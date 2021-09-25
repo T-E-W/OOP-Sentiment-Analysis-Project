@@ -50,10 +50,11 @@ public class TweetCollection extends Predictor{
 	// Return list of all IDs of the Tweets in the Collection
 	public ArrayList<String> getIds() {
 		ArrayList <String> ids = new ArrayList<String>();
-		
-		for(int i = 0; i < tweets.size(); i++){
+		int i;
+		for(i = 0; i < tweets.size(); i++){
 			ids.add(tweets.get(i).getId());
 		}
+		ids.add(String.valueOf(i));
 		return ids;
 	}
 	
@@ -86,12 +87,12 @@ public class TweetCollection extends Predictor{
 
 	}
 	
-	public int predict() {
+	public Predictor predict() {
 		for(int i = 0; i < tweets.size(); i++) {
 			//System.out.println((this.predict(tweets.get(i))));
 			this.predict(tweets.get(i));
 		}
-		return 0;
+		return p;
 	}
 
 	
