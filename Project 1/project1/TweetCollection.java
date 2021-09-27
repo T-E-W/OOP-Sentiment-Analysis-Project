@@ -13,7 +13,7 @@ public class TweetCollection{
 	private ArrayList<Tweet> tweets;
 	private String fileName;
 
-//	Variables for predictor   
+//	Variables for predictor    
 	private String positiveWords;
 	private String negativeWords;
 	private static double predictedPosPolarity;
