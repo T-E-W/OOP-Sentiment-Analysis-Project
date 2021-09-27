@@ -18,10 +18,13 @@ public class TweetCollection{
 	private String negativeWords;
 	private static double predictedPosPolarity;
 	private static double predictedNegPolarity;
+	private static double predictedNeuPolarity;
 	private static double correctPosPolarity;
 	private static double correctNegPolarity;
+	private static double correctNeuPolarity;
 	private static double numPosPolarity;
 	private static double numNegPolarity;
+	private static double numNeuPolarity;
 	
 	// TC Default Constructor
 	public TweetCollection() {
@@ -104,24 +107,31 @@ public class TweetCollection{
 		
 		double percentPos = (correctPosPolarity / numPosPolarity) * 100;
 		double percentNeg = (correctNegPolarity / numNegPolarity) * 100;
+		double percentNeu = (correctNeuPolarity / numNeuPolarity) * 100;
 		
 		if(numPosPolarity == 0)
 			percentPos = 0;
 		if(numNegPolarity == 0)
 			percentNeg = 0;
+		if(numNeuPolarity == 0)
+			percentNeu = 0;
 		
-		double percentTotal = ((correctPosPolarity + correctNegPolarity) / (numPosPolarity + numNegPolarity)) * 100;
+		double percentTotal = ((correctPosPolarity + correctNegPolarity + correctNeuPolarity) / (numPosPolarity + numNegPolarity + numNeuPolarity)) * 100;
 		
 		
 		return "Predictor Results: "
 		     + "\n  Actual # Positive Tweets: " + (int)numPosPolarity + 
 			   "\n  Actual # Negative Tweets: " + (int)numNegPolarity +
+			    "\n  Actual # Neutral Tweets: " + (int)numNeuPolarity + 
 			  "\n  Predicted Positive Tweets: " + (int)predictedPosPolarity +
 			  "\n  Predicted Negative Tweets: " + (int)predictedNegPolarity +
+			   "\n  Predicted Neutral Tweets: " + (int)predictedNeuPolarity + 
 		   "\n  Correct Positive Predictions: " + (int)correctPosPolarity +
 		   "\n  Correct Negative Predictions: " + (int)correctNegPolarity +
+		    "\n  Correct Neutral Predictions: " + (int)correctNeuPolarity + 
 		   "\n  % of Positives Guessed Right: " + String.format("%.2f",percentPos) + "%" +
 		   "\n  % of Negatives Guessed Right: " + String.format("%.2f",percentNeg) + "%" +
+		     "\n  % of Neutral Guessed Right: " + String.format("%.2f",percentNeu) + "%" + 
 			  "\n  Total Accuracy Percentage: " + String.format("%.2f",percentTotal) + "%";
 	}
 	
@@ -197,21 +207,29 @@ public class TweetCollection{
 			numNegPolarity += 1;
 		if(tw.getPolarity().equals("4"))
 			numPosPolarity += 1;
+		if(tw.getPolarity().equals("2"))
+			numNeuPolarity += 1;
 		
 		// if the polarity equals 4 and i predicted positive, add one (Correct predictions add one to either neg/pos)
-		if(tw.getPolarity().equals("4") && negwords <= 0) 
+		if(tw.getPolarity().equals("4") && negwords < 1) 
 			correctPosPolarity += 1;		
-		else if(tw.getPolarity().equals("0") && negwords > 0)
+		else if(tw.getPolarity().equals("0") && negwords > 2)
 			correctNegPolarity += 1;
+		else if(tw.getPolarity().equals("2") && (negwords <=2 || negwords >=1))
+			correctNeuPolarity += 1;
 
 		// if I predict neg or positive, add 1 accordingly.
-		if(negwords > 0) {
+		if(negwords > 2) {
 			predictedNegPolarity += 1;
 			return 0;
 		}
-		else{
+		else if(negwords < 1){
 			predictedPosPolarity += 1;
 			return 4;
+		}
+		else{
+			predictedNeuPolarity += 1;
+			return 2;
 		}
 
 	}
