@@ -4,7 +4,7 @@ public class Project1Main {
 
 	public static void main(String[] args) {
 		
-		//Create a TweetCollection and filled with testTweets.txt
+		//Create a TweetCollection and filled with testTweets.txt 
 		TweetCollection tc1 = new TweetCollection("testTweets.txt");
 		
 		//create a tweet
