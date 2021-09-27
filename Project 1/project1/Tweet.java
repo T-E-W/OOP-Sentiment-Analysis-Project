@@ -6,7 +6,7 @@ public class Tweet extends TweetCollection{
 	private String user;
 	private String bodyText;
 	
-	// Default Constructor 
+	// Default Constructor  
 	public Tweet() {
 		id = "not set";
 		polarity = "not set";		
