@@ -12,25 +12,25 @@ import java.io.InputStreamReader;
 public class TweetCollection{
 	private ArrayList<Tweet> tweets;
 	private String fileName;
+
+//	Variables for predictor
 	private String positiveWords;
 	private String negativeWords;
-	public static double predictedPosPolarity;
-	public static double predictedNegPolarity;
-	public static double correctPosPolarity;
-	public static double correctNegPolarity;
-	public static double numPosPolarity;
-	public static double numNegPolarity;
-	
-	
-	
-	
+	private static double predictedPosPolarity;
+	private static double predictedNegPolarity;
+	private static double correctPosPolarity;
+	private static double correctNegPolarity;
+	private static double numPosPolarity;
+	private static double numNegPolarity;
 	
 	// TC Default Constructor
 	public TweetCollection() {
-		fileName="tweets";
+		fileName="";
 		tweets = new ArrayList<Tweet>();
+		//negative & positive words for predictor
 		negativeWords="negWords.txt";
 		positiveWords="posWords.txt";
+		
 	}
 	public TweetCollection(String fn) {
 		this();		
@@ -45,65 +45,61 @@ public class TweetCollection{
 	
 	// Retrieve tweet based off ID;
 	public Tweet get(String rid) {
-		int i = 0;
-		while(i < tweets.size() && !tweets.get(i).getId().equals(rid) ) {
-			i++;
-		}
-		
-		try {
-			if(tweets.get(i).getId().equals(rid))
-				return tweets.get(i);
-		}
-		catch (Exception e) {
-			System.err.println("No tweet correlates to id " + rid);
-			
-		}
-		return null;	
+		int index = tweets.indexOf(new Tweet(rid));
+		return tweets.get(index);
 	}
 	
 	// Return list of all IDs of the Tweets in the Collection
 	public ArrayList<String> getIds() {
 		ArrayList <String> ids = new ArrayList<String>();
 		int i;
-		for(i = 0; i < tweets.size(); i++){
-			ids.add(tweets.get(i).getId());
+		if(tweets.size()>20) {
+			for(i = 0; i < 10; i++){
+				ids.add(tweets.get(i).getId());
+			}
+			for(i = tweets.size() - 10; i < tweets.size(); i ++) {
+				ids.add(tweets.get(i).getId());
+			}
+			return ids;
 		}
-		return ids;
+		else
+			for(i = 0; i < tweets.size(); i ++) {
+				ids.add(tweets.get(i).getId());
+			}
+			return ids;
 	}
 	
 	// Return all IDs of tweets from specific User Name
 	public ArrayList<String> getUserTweetIds(String name) {
-		ArrayList<String> ids = new ArrayList<String>();
+		ArrayList<String> toReturn = new ArrayList<String>();
 		for(int i = 0; i < tweets.size(); i++) {
 			if(tweets.get(i).getUser().equals(name)) {
-				ids.add(tweets.get(i).getId());
+				toReturn.add(tweets.get(i).getId());
 			}
 		}
-		return ids;
+		return toReturn;
 	}
 	
-	// Delete/Remove tweet using ID from collection.
-	public void remove(String id) {
-		int i = 0;
-
-		while(i < tweets.size() && !tweets.get(i).getId().equals(id) ) {
-			i++;
-		}
-		
-		try {
-			if(tweets.get(i).getId().equals(id))
-				tweets.remove(i);
-		}
-		catch (Exception e) {
-			System.err.println("No tweet correlates to id: " + id);
-		}
-
+	// Delete/Remove tweet from collection.
+	public void removeTweet(Tweet tw) {
+		tweets.remove(tw);
 	}
 	
-	public String predict() {
-		for(int i = 0; i < tweets.size(); i++) {
-			//System.out.println((this.predict(tweets.get(i))));
-			predict(tweets.get(i));
+	// Feeds predictor(Tweet tw) with tweets from collection. Takes a boolean for testing first and last 10 tweets(false) or all(true).
+	public String predict(boolean pdAll) {
+		if(pdAll == true) {
+			for(int i = 0; i < tweets.size(); i++) {
+				//System.out.println((this.predict(tweets.get(i))));
+				predict(tweets.get(i));
+			}
+		}
+		else {
+			for(int i = 0; i < 10; i++) {
+				predict(tweets.get(i));
+			}
+			for(int i = tweets.size()-10; i < tweets.size(); i++) {
+				predict(tweets.get(i));
+			}
 		}
 		
 		double percentPos = (correctPosPolarity / numPosPolarity) * 100;
@@ -117,16 +113,20 @@ public class TweetCollection{
 		double percentTotal = ((correctPosPolarity + correctNegPolarity) / (numPosPolarity + numNegPolarity)) * 100;
 		
 		
-		return "Predictor "
-				+ "\n Total Positive Tweets: " + numPosPolarity + 
-				  "\n Total Negative Tweets: " + numNegPolarity +
-			  "\n Predicted Positive Tweets: " + predictedPosPolarity +
-			  "\n Predicted Negative Tweets: " + predictedNegPolarity +
-		   "\n % of Positives Guessed Right: " + String.format("%.2f",percentPos) +
-		  "%\n % of Negatives Guessed Right: " + String.format("%.2f",percentNeg) + "%" +
-			  "\n Total Accuracy Percentage: " + String.format("%.2f", percentTotal) + "%";
+		return "Predictor Results: "
+		     + "\n  Actual # Positive Tweets: " + (int)numPosPolarity + 
+			   "\n  Actual # Negative Tweets: " + (int)numNegPolarity +
+			  "\n  Predicted Positive Tweets: " + (int)predictedPosPolarity +
+			  "\n  Predicted Negative Tweets: " + (int)predictedNegPolarity +
+		   "\n  Correct Positive Predictions: " + (int)correctPosPolarity +
+		   "\n  Correct Negative Predictions: " + (int)correctNegPolarity +
+		   "\n  % of Positives Guessed Right: " + String.format("%.2f",percentPos) + "%" +
+		   "\n  % of Negatives Guessed Right: " + String.format("%.2f",percentNeg) + "%" +
+			  "\n  Total Accuracy Percentage: " + String.format("%.2f",percentTotal) + "%";
 	}
 	
+	// Fed by direct call in tester, or by predict(boolean). Returns a 0 or 4 for testing singles, or updates global variables to do
+	// math on a collection of tweets to output accuracy(%). 
 	public int predict(Tweet tw) {
 		int negwords = 0;
 		
@@ -140,7 +140,6 @@ public class TweetCollection{
 			fr = new FileReader(negativeWords);
 			lineReader = new BufferedReader(fr);
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -170,7 +169,6 @@ public class TweetCollection{
 			fr = new FileReader(positiveWords);
 			lineReader = new BufferedReader(fr);
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -193,8 +191,8 @@ public class TweetCollection{
 			e.printStackTrace();
 		}
 		
-		//adding 1 to num if it is pos or neg.
-		//Tracks how many of each tweet there is without having to know
+		// adding 1 to num if it is pos or neg.
+		// Tracks how many of each tweet there is without having to know
 		if(tw.getPolarity().equals("0"))
 			numNegPolarity += 1;
 		if(tw.getPolarity().equals("4"))
@@ -218,6 +216,7 @@ public class TweetCollection{
 
 	}
 
+	// Resets global variables so that we can add new tweets after a prediction in main and reset to prevent duplicate prediction %'s
 	public void resetPdr() {
 		predictedPosPolarity = 0;
 		predictedNegPolarity = 0;
@@ -227,12 +226,26 @@ public class TweetCollection{
 		numNegPolarity = 0;
 	}
 	
+	//toString
 	@Override
 	public String toString() {
-		return "TweetCollection [tweets=" + tweets + "]";
+		ArrayList<Tweet> toReturn = new ArrayList<Tweet>();
+		int i = 0;
+		
+		if(tweets.size()>20) {
+			for(i = 0; i < 10; i++) {
+				toReturn.add(tweets.get(i));
+			}
+			for(i = tweets.size() - 10; i < tweets.size(); i++) {
+				toReturn.add(tweets.get(i));
+			}
+			return "TweetCollection [tweets=" + toReturn + "]";
+		}
+		else
+			return "TweetCollection [tweets=" + tweets + "]";
 	}
 	
-	//read/write files as done in HW, edited to fit.
+	//read/write files, edited to fit from HW.
 	private void readFile () {
 		BufferedReader lineReader = null;
 		try {
@@ -244,7 +257,7 @@ public class TweetCollection{
 				if(line != null) {
 					String[] parts = line.split(",");
 					Tweet tw = new Tweet(parts[0], parts[1], parts[2], parts[3]);
-					tweets.add(tw);
+					tweets.add(new Tweet(parts[0], parts[1], parts[2], parts[3]));
 				}
 				
 			}

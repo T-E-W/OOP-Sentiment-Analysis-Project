@@ -13,7 +13,7 @@ public class Tweet extends TweetCollection{
 		user = "not set";
 		bodyText = "not set";
 	}
-	//?
+	// Used for get/remove methods in tweetcollection
 	public Tweet(String ids) {
 		this();
 		id = ids;
@@ -44,15 +44,21 @@ public class Tweet extends TweetCollection{
 		return bodyText;
 	}
 	
-	
-//  Equals Method (Test for duplicates)
-	public boolean equalsId(Object tw) {
-		return id == ((Tweet)tw).id;
+	// Equals method from source. Slightly edited for only relevant information.
+	@Override
+	public boolean equals(Object obj) {
+		Tweet other = (Tweet) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
 	}
 
 	
 	
-//  toString, print the tweet.
+//  toString, returns the tweet.
 	@Override
 	public String toString() {
 		return "Tweet [polarity=" + polarity + ", id=" + id + ", user=" + user + ", bodyText=" + bodyText + "]";
