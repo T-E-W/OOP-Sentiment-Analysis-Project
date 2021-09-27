@@ -2,21 +2,35 @@ package project1;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 
-public class TweetCollection extends Predictor{
+public class TweetCollection{
 	private ArrayList<Tweet> tweets;
 	private String fileName;
-	private Predictor p;
+	private String positiveWords;
+	private String negativeWords;
+	public static double predictedPosPolarity;
+	public static double predictedNegPolarity;
+	public static double correctPosPolarity;
+	public static double correctNegPolarity;
+	public static double numPosPolarity;
+	public static double numNegPolarity;
 	
+	
+	
+	
+	
+	// TC Default Constructor
 	public TweetCollection() {
 		fileName="tweets";
 		tweets = new ArrayList<Tweet>();
-		p = new Predictor();
+		negativeWords="negWords.txt";
+		positiveWords="posWords.txt";
 	}
 	public TweetCollection(String fn) {
 		this();		
@@ -41,10 +55,10 @@ public class TweetCollection extends Predictor{
 				return tweets.get(i);
 		}
 		catch (Exception e) {
-			System.err.println("No tweet correlates to id: " + rid);
+			System.err.println("No tweet correlates to id " + rid);
 			
 		}
-		return null;		
+		return null;	
 	}
 	
 	// Return list of all IDs of the Tweets in the Collection
@@ -54,7 +68,6 @@ public class TweetCollection extends Predictor{
 		for(i = 0; i < tweets.size(); i++){
 			ids.add(tweets.get(i).getId());
 		}
-		ids.add(String.valueOf(i));
 		return ids;
 	}
 	
@@ -87,24 +100,136 @@ public class TweetCollection extends Predictor{
 
 	}
 	
-	public Predictor predict() {
+	public String predict() {
 		for(int i = 0; i < tweets.size(); i++) {
 			//System.out.println((this.predict(tweets.get(i))));
-			this.predict(tweets.get(i));
+			predict(tweets.get(i));
 		}
-		return p;
+		
+		double percentPos = (correctPosPolarity / numPosPolarity) * 100;
+		double percentNeg = (correctNegPolarity / numNegPolarity) * 100;
+		
+		if(numPosPolarity == 0)
+			percentPos = 0;
+		if(numNegPolarity == 0)
+			percentNeg = 0;
+		
+		double percentTotal = ((correctPosPolarity + correctNegPolarity) / (numPosPolarity + numNegPolarity)) * 100;
+		
+		
+		return "Predictor "
+				+ "\n Total Positive Tweets: " + numPosPolarity + 
+				  "\n Total Negative Tweets: " + numNegPolarity +
+			  "\n Predicted Positive Tweets: " + predictedPosPolarity +
+			  "\n Predicted Negative Tweets: " + predictedNegPolarity +
+		   "\n % of Positives Guessed Right: " + String.format("%.2f",percentPos) +
+		  "%\n % of Negatives Guessed Right: " + String.format("%.2f",percentNeg) + "%" +
+			  "\n Total Accuracy Percentage: " + String.format("%.2f", percentTotal) + "%";
+	}
+	
+	public int predict(Tweet tw) {
+		int negwords = 0;
+		
+		//Was using this to do a poswords/negwords comparison, went with adding/subtracting from negwords instead.
+		//int poswords = 0;
+		BufferedReader lineReader = null;
+		FileReader fr;
+		
+		//negative words
+		try {
+			fr = new FileReader(negativeWords);
+			lineReader = new BufferedReader(fr);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+	
+		String line = null;
+		
+		try {
+			while ((line = lineReader.readLine())!=null) {
+				if(tw.getBodyText().toLowerCase().contains(line)) {
+					 negwords++;
+				}
+
+			}
+		} catch (IOException e1) {
+			
+			e1.printStackTrace();
+		}
+		try {
+			lineReader.close();
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		
+		//positive words
+		try {
+			fr = new FileReader(positiveWords);
+			lineReader = new BufferedReader(fr);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		line = null;
+		
+		try {
+			while ((line = lineReader.readLine())!=null) {
+				if(tw.getBodyText().toLowerCase().contains(line)) {
+					 negwords--;
+				}
+			}
+		} catch (IOException e1) {
+			
+			e1.printStackTrace();
+		}
+		try {
+			lineReader.close();
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		
+		//adding 1 to num if it is pos or neg.
+		//Tracks how many of each tweet there is without having to know
+		if(tw.getPolarity().equals("0"))
+			numNegPolarity += 1;
+		if(tw.getPolarity().equals("4"))
+			numPosPolarity += 1;
+		
+		// if the polarity equals 4 and i predicted positive, add one (Correct predictions add one to either neg/pos)
+		if(tw.getPolarity().equals("4") && negwords <= 0) 
+			correctPosPolarity += 1;		
+		else if(tw.getPolarity().equals("0") && negwords > 0)
+			correctNegPolarity += 1;
+
+		// if I predict neg or positive, add 1 accordingly.
+		if(negwords > 0) {
+			predictedNegPolarity += 1;
+			return 0;
+		}
+		else{
+			predictedPosPolarity += 1;
+			return 4;
+		}
+
 	}
 
+	public void resetPdr() {
+		predictedPosPolarity = 0;
+		predictedNegPolarity = 0;
+		correctPosPolarity = 0;
+		correctNegPolarity = 0;
+		numPosPolarity = 0;
+		numNegPolarity = 0;
+	}
 	
 	@Override
 	public String toString() {
-		System.out.println("\nTweets:\n");
-		for(int i = 0; i < 10; i++) {
-			System.out.println(tweets.get(i));
-		}
-		
-		
-		return "TweetData:\n " + p;
+		return "TweetCollection [tweets=" + tweets + "]";
 	}
 	
 	//read/write files as done in HW, edited to fit.
@@ -116,9 +241,11 @@ public class TweetCollection extends Predictor{
 			String line = null;
 			// While line is not empty, split line, make new tweet(tw), add it
 			while ((line = lineReader.readLine())!=null) {
-				String[] parts = line.split(",");
-				Tweet tw = new Tweet(parts[0], parts[1], parts[2], parts[3]);
-				tweets.add(tw);
+				if(line != null) {
+					String[] parts = line.split(",");
+					Tweet tw = new Tweet(parts[0], parts[1], parts[2], parts[3]);
+					tweets.add(tw);
+				}
 				
 			}
 		} catch (Exception e) {
@@ -169,7 +296,7 @@ public class TweetCollection extends Predictor{
 		{
 
 			FileWriter fw = new FileWriter(fn);
-			BufferedWriter myOutfile = new BufferedWriter(fw);			
+			BufferedWriter myOutfile = new BufferedWriter(fw);
 			
 			for (int i = 0; i < tweets.size(); i++) {
 				Tweet tweet = tweets.get(i);

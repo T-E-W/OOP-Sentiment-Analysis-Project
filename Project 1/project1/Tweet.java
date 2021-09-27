@@ -1,6 +1,6 @@
 package project1;
 
-public class Tweet {
+public class Tweet extends TweetCollection{
 	private String polarity;
 	private String id;
 	private String user;
@@ -13,12 +13,10 @@ public class Tweet {
 		user = "not set";
 		bodyText = "not set";
 	}
-	//
+	//?
 	public Tweet(String ids) {
-		polarity = "not set";
+		this();
 		id = ids;
-		user = "not set";
-		bodyText = "not set";
 	}
 	
 	
