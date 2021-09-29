@@ -16,6 +16,8 @@ public class TweetCollection{
 //	Variables for predictor    
 	private String positiveWords;
 	private String negativeWords;
+	private ArrayList<String> negativeWordList;
+	private ArrayList<String> positiveWordList;
 	private static double predictedPosPolarity;
 	private static double predictedNegPolarity;
 	private static double predictedNeuPolarity;
@@ -31,8 +33,11 @@ public class TweetCollection{
 		fileName="";
 		tweets = new ArrayList<Tweet>();
 		//negative & positive words for predictor
+		positiveWordList = new ArrayList<String>();
+		negativeWordList = new ArrayList<String>();
 		negativeWords="negWords.txt";
 		positiveWords="posWords.txt";
+	
 		
 	}
 	public TweetCollection(String fn) {
@@ -49,32 +54,26 @@ public class TweetCollection{
 	// Retrieve tweet based off ID;
 	public Tweet get(String rid) {
 		int index = tweets.indexOf(new Tweet(rid));
+		if(index > -1)
+			return null;
+			
 		return tweets.get(index);
 	}
 	
 	// Return list of all IDs of the Tweets in the Collection
 	public ArrayList<String> getIds() {
 		ArrayList <String> ids = new ArrayList<String>();
-		int i;
-		if(tweets.size()>20) {
-			for(i = 0; i < 10; i++){
-				ids.add(tweets.get(i).getId());
-			}
-			for(i = tweets.size() - 10; i < tweets.size(); i ++) {
-				ids.add(tweets.get(i).getId());
-			}
-			return ids;
+
+		for(int i = 0; i < tweets.size(); i ++) {
+			ids.add(tweets.get(i).getId());
 		}
-		else
-			for(i = 0; i < tweets.size(); i ++) {
-				ids.add(tweets.get(i).getId());
-			}
-			return ids;
+		return ids;
 	}
 	
 	// Return all IDs of tweets from specific User Name
 	public ArrayList<String> getUserTweetIds(String name) {
 		ArrayList<String> toReturn = new ArrayList<String>();
+		
 		for(int i = 0; i < tweets.size(); i++) {
 			if(tweets.get(i).getUser().equals(name)) {
 				toReturn.add(tweets.get(i).getId());
@@ -85,7 +84,11 @@ public class TweetCollection{
 	
 	// Delete/Remove tweet from collection.
 	public void removeTweet(Tweet tw) {
-		tweets.remove(tw);
+		if(!tweets.contains(tw))
+			System.out.println("Tweet does not exist");
+		else
+			tweets.remove(tw);
+			
 	}
 	
 	// Feeds predictor(Tweet tw) with tweets from collection. Takes a boolean for testing first and last 10 tweets(false) or all(true).
@@ -138,68 +141,24 @@ public class TweetCollection{
 	// Fed by direct call in tester, or by predict(boolean). Returns a 0 or 4 for testing singles, or updates global variables to do
 	// math on a collection of tweets to output accuracy(%). 
 	public int predict(Tweet tw) {
-		int negwords = 0;
+		int polarity = 0;
 		
-		//Was using this to do a poswords/negwords comparison, went with adding/subtracting from negwords instead.
+		//Was using this to do a poswords/polarity comparison, went with adding/subtracting from negwords instead.
 		//int poswords = 0;
-		BufferedReader lineReader = null;
-		FileReader fr;
+
 		
 		//negative words
-		try {
-			fr = new FileReader(negativeWords);
-			lineReader = new BufferedReader(fr);
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		
-	
-		String line = null;
-		
-		try {
-			while ((line = lineReader.readLine())!=null) {
-				if(tw.getBodyText().toLowerCase().contains(line)) {
-					 negwords++;
-				}
-
+		for(int i = 0; i < negativeWordList.size(); i++) {
+			if(tw.getBodyText().contains(negativeWordList.get(i))) {
+				polarity--;
 			}
-		} catch (IOException e1) {
-			
-			e1.printStackTrace();
 		}
-		try {
-			lineReader.close();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
-		
-		//positive words
-		try {
-			fr = new FileReader(positiveWords);
-			lineReader = new BufferedReader(fr);
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		
-		line = null;
-		
-		try {
-			while ((line = lineReader.readLine())!=null) {
-				if(tw.getBodyText().toLowerCase().contains(line)) {
-					 negwords--;
-				}
+		for(int i = 0; i < positiveWordList.size(); i++) {
+			if(tw.getBodyText().contains(positiveWordList.get(i))) {
+				polarity++;
 			}
-		} catch (IOException e1) {
-			
-			e1.printStackTrace();
 		}
-		try {
-			lineReader.close();
-		} catch (IOException e) {
 			
-			e.printStackTrace();
-		}
 		
 		// adding 1 to num if it is pos or neg.
 		// Tracks how many of each tweet there is without having to know
@@ -211,19 +170,19 @@ public class TweetCollection{
 			numNeuPolarity += 1;
 		
 		// if the polarity equals 4 and i predicted positive, add one (Correct predictions add one to either neg/pos)
-		if(tw.getPolarity().equals("4") && negwords < 1) 
+		if(tw.getPolarity().equals("4") && polarity < 1) 
 			correctPosPolarity += 1;		
-		else if(tw.getPolarity().equals("0") && negwords > 2)
+		else if(tw.getPolarity().equals("0") && polarity > 2)
 			correctNegPolarity += 1;
-		else if(tw.getPolarity().equals("2") && (negwords <=2 || negwords >=1))
+		else if(tw.getPolarity().equals("2") && (polarity <=2 || polarity >=1))
 			correctNeuPolarity += 1;
 
 		// if I predict neg or positive, add 1 accordingly.
-		if(negwords > 2) {
+		if(polarity > 2) {
 			predictedNegPolarity += 1;
 			return 0;
 		}
-		else if(negwords < 1){
+		else if(polarity < 1){
 			predictedPosPolarity += 1;
 			return 4;
 		}
@@ -264,6 +223,59 @@ public class TweetCollection{
 	}
 	
 	//read/write files, edited to fit from HW.
+	private void readPredictWords(String fn) {
+		BufferedReader lineReader = null;
+		try {
+			FileReader fr = new FileReader(negativeWords);
+			lineReader = new BufferedReader(fr);
+			String line = null;
+			while((line = lineReader.readLine())!=null) {
+				negativeWordList.add(line);
+			}
+			fr = new FileReader(positiveWords);
+			lineReader = new BufferedReader(fr);
+			line = null;
+			while((line = lineReader.readLine())!=null) {
+				positiveWordList.add(line);
+			}
+		}
+		catch(Exception e) {
+			System.err.println("there was a problem with the file reader, try different read type.");
+			try {
+				lineReader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(negativeWords.substring(1))));
+				String line = null;
+				while((line = lineReader.readLine())!= null) {
+					negativeWordList.add(line);
+				}
+				lineReader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(positiveWords.substring(1))));
+				line = null;
+				while((line = lineReader.readLine())!= null) {
+					positiveWordList.add(line);
+				}
+			
+		} catch (Exception e2) {
+			System.err.println("there was a problem with the file reader, try again.  either no such file or format error");
+		} finally {
+			if (lineReader != null)
+				try {
+					lineReader.close();
+				} catch (IOException e2) {
+					System.err.println("could not close BufferedReader");
+				}
+		}			
+		} finally {
+			if (lineReader != null)
+				try {
+					lineReader.close();
+				} catch (IOException e) {
+					System.err.println("could not close BufferedReader");
+				}
+		}
+	} // end of readFile method	
+				
+			
+		
+	
 	private void readFile () {
 		BufferedReader lineReader = null;
 		try {
@@ -287,7 +299,7 @@ public class TweetCollection{
 				while ((line = lineReader.readLine())!=null) {
 					String[] parts = lineReader.readLine().split(",");
 					for(String part : parts) {
-						tweets.add(new Tweet(parts[1], parts[2], parts[3], parts[4]));
+						tweets.add(new Tweet(parts[0], parts[1], parts[2], parts[3]));
 					}
 				}
 			} catch (Exception e2) {

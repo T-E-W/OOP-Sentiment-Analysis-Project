@@ -22,15 +22,26 @@ public class Tweet extends TweetCollection{
 	
 	// Parameterized Constructor
 	public Tweet(String polarity, String id, String user, String bodyText) {
-		super();
 		this.polarity = polarity;
 		this.id = id;
 		this.user = user;
 		this.bodyText = bodyText;
 	}
 	
-	
-//  Getters
+    //Setters
+	public void setPolarity(String polarity) {
+		this.polarity = polarity;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public void setUser(String user) {
+		this.user = user;
+	}
+	public void setBodyText(String bodyText) {
+		this.bodyText = bodyText;
+	}
+	//  Getters
 	public String getId() {
 		return id;
 	}
