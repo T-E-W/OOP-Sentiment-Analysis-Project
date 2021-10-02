@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
  */
 
 public class TweetCollection{
+	
 	private ArrayList<Tweet> tweets;
 	private String fileName;  
 	private String positiveWords;
@@ -30,13 +31,7 @@ public class TweetCollection{
 	private static double numPosPolarity;
 	private static double numNegPolarity;
 	private static double numNeuPolarity;
-	/**
-	 * @param tweets  Collection of Tweets
-	 * @param fileName  filename of tweet text document
-	 * @param positiveWords  filename of positiveWords list
-	 * @param negativeWords  filename of positiveWords list
-	 *
-	 */
+	
 	
 	/**
 	 * Default Constructor
@@ -51,7 +46,7 @@ public class TweetCollection{
 	}
 	
 	/**
-	 * Paramaterized constructor for filename.
+	 * Parameterized constructor for filename.
 	 * 
 	 * @param fn   Filename of the tweets list.
 	 */
@@ -61,14 +56,7 @@ public class TweetCollection{
 		readFile();
 		readPredictWords();
 	}
-	/**
-	 * fileName: file that contains tweets
-	 * tweets: instantiating tweets ArrayList
-	 * positiveWordList: ArrayList to store Positive Words
-	 * negativeWordList: ArrayList to store Negative Words
-	 * negativeWords: Text file of Negative Words
-	 * positiveWords: Text file of Positive Words
-	 */
+
 	
 	/**
 	 * Adds a tweet to the ArrayList
