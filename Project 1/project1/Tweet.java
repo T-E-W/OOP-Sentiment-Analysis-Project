@@ -2,26 +2,26 @@ package project1;
 
 public class Tweet extends TweetCollection{
 	private String polarity;
-	private String id;
+	private long id;
 	private String user;
 	private String bodyText;
 	
 	// Default Constructor   
 	public Tweet() {
-		id = "not set";
+		id = 0;
 		polarity = "not set";		
 		user = "not set";
 		bodyText = "not set";
 	}
 	// Used for get/remove methods in tweetcollection
-	public Tweet(String ids) {
+	public Tweet(long ids) {
 		this();
 		id = ids;
 	}
 	
 	
 	// Parameterized Constructor
-	public Tweet(String polarity, String id, String user, String bodyText) {
+	public Tweet(String polarity, long id, String user, String bodyText) {
 		this.polarity = polarity;
 		this.id = id;
 		this.user = user;
@@ -32,7 +32,7 @@ public class Tweet extends TweetCollection{
 	public void setPolarity(String polarity) {
 		this.polarity = polarity;
 	}
-	public void setId(String id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 	public void setUser(String user) {
@@ -41,8 +41,9 @@ public class Tweet extends TweetCollection{
 	public void setBodyText(String bodyText) {
 		this.bodyText = bodyText;
 	}
+	
 	//  Getters
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 	public String getUser() {
@@ -58,16 +59,20 @@ public class Tweet extends TweetCollection{
 	// Equals method from source. Slightly edited for only relevant information.
 	@Override
 	public boolean equals(Object obj) {
-		Tweet other = (Tweet) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
+		Tweet tobj = (Tweet) obj;
+		return this.getId() == tobj.getId();
 	}
 
-	
+	public int compareTo (Object obj) {
+		Tweet tobj = (Tweet)obj;
+		if(this.getId() == tobj.getId()) {
+			return 0;
+		}
+		if(this.getId() > tobj.getId()) {
+			return 1;
+		}
+		return -1;
+	}
 	
 //  toString, returns the tweet.
 	@Override
