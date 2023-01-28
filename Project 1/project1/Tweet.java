@@ -28,7 +28,7 @@ public class Tweet extends TweetCollection{
 		this.bodyText = bodyText;
 	}
 	
-    //Setters
+        //Setters
 	public void setPolarity(String polarity) {
 		this.polarity = polarity;
 	}
